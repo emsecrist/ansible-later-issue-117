@@ -1,0 +1,39 @@
+---
+- name: Create rpm-gpg directory
+  file:
+    path: /etc/pki/rpm-gpg
+    state: directory
+    mode: '0755'
+
+- name: Copy Tenable 2048 GPG key
+  copy:
+    src: etc/pki/rpm-gpg/RPM-GPG-KEY-Tenable-2048
+    dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-Tenable-2048
+
+- name: Import Tenable 2048 Key
+  rpm_key:
+    state: present
+    key: /etc/pki/rpm-gpg/RPM-GPG-KEY-Tenable-2048
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Install Nessus Agent RPM
+  yum:
+    name: NessusAgent
+    state: present
+    update_cache: yes
+
+- name: Enable Nessus agent service
+  systemd:
+    name: nessusagent.service
+    enabled: yes
+    state: started
+
+- name: Check if agent is linked
+  command: >
+    /bin/bash -c '[ -f /opt/nessus_agent/sbin/nessuscli ] &&
+    /opt/nessus_agent/sbin/nessuscli agent status | grep -i "Linked to" >/dev/null 2>&1'
+  check_mode: no
+  changed_when: agent_linked.rc == 1
+  failed_when: False
+  register: agent_linked
+  notify: handler_link_nessus

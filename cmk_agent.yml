@@ -1,0 +1,20 @@
+---
+# REVISION CONTROL INFO:
+# $Id$
+# $URL$
+#
+
+
+- name: Install CMK agent
+  yum: pkg={{item}} state=installed
+  with_items:
+     - check-mk-agent
+     - xinetd
+  tags:
+     - packages
+
+- name: ensure running services for cmk
+  service: name={{item}} state=started enabled=yes
+  with_items:
+     - xinetd
+

@@ -1,0 +1,84 @@
+- name: Add additional Zypper Package Hub Repo's
+  shell: "SUSEConnect --product PackageHub/15.2/x86_64; SUSEConnect --product sle-module-development-tools/15.2/x86_64; SUSEConnect --product sle-module-python2/15.2/x86_64"
+
+
+- name: Configure XXX XXX Mirrors Repo
+  community.general.zypper_repository:
+    name: "xxxtools-xxxmirror"
+    repo: "http://xxxxmirrors.company.com/pub/xxx/sles15/"
+    disable_gpg_check: yes
+
+- name: Install common base packages
+  community.general.zypper:
+    state: present
+    update_cache: True
+    name:
+      - git-core
+      - flexera
+      - nfs-utils
+      - mlocate
+      - strace
+      - sysstat
+      - tree
+      - krb5
+      - krb5-client
+      - openldap2-client
+      - strace
+      - tcpdump
+      - dstat
+      - ncompress 
+
+- name: Copy Company PKI certs
+  copy:
+    src: pki/
+    dest: /etc/pki/trust/anchors
+  notify:
+       - handler_pki_certs
+
+- name: Ensure apparmor is disabled
+  systemd:
+    name: apparmor
+    enabled: False
+    state: stopped
+
+
+- name: Write banner files
+  copy:
+    dest: "{{ item }}"
+    content: |
+      Welcome to SUSE Linux Enterprise Server for SAP Applications 15.
+      Authorized uses only. All activity may be monitored and reported.
+  loop:
+    - "/etc/issue"
+    - "/etc/issue.net"
+    - "/etc/motd"
+
+- name: Configure Chronyd to use Company time servers
+  template:
+    src: chrony.conf.j2
+    dest: /etc/chrony.conf
+  notify: handler_restart_chronyd
+
+- name: Verify Chronyd is enabled
+  systemd:
+    name: chronyd
+    enabled: True
+    state: started
+
+- name: Copy postfix config file
+  template:
+    src: main.cf.j2
+    dest: /etc/postfix/main.cf
+    mode: 0644
+  notify: handler_restart_postfix
+
+- name: Copy aliases file
+  copy:
+    src: etc/aliases
+    dest: /etc/aliases
+  notify: handler_newaliases
+
+- name: Copy sudoers file
+  copy:
+    src: etc/sudoers
+    dest: /etc/sudoers

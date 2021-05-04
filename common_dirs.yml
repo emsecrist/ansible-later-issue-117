@@ -1,0 +1,35 @@
+- name: Create common built-in dirs (always)
+  file: path={{ item.path }} owner={{ item.owner }} group={{ item.group }} mode={{ item.mode }} state=directory
+  with_items:
+      - { path: '/company/prodscript/local',
+          owner: 'root',
+          group: 'root',
+          mode: '0775' }
+      - { path: '/company/prodscript/distributed',
+          owner: 'root',
+          group: 'root',
+          mode: '0775' }
+      - { path: '/company/working',
+          owner: 'root',
+          group: '12000',
+          mode: '0770' }
+      - { path: '/company/startup',
+          owner: 'root',
+          group: 'root',
+          mode: '0775' }
+      - { path: '/mnt/nbumedia',
+          owner: 'root',
+          group: 'root',
+          mode: '0775' }
+      - { path: '/etc/init.d/xxx_maint.d',
+          owner: 'root',
+          group: 'root',
+          mode: '0755' }
+      - { path: '/etc/init.d/xxx_maint.d/start.d',
+          owner: 'root',
+          group: 'root',
+          mode: '0755' }
+      - { path: '/etc/init.d/xxx_maint.d/stop.d',
+          owner: 'root',
+          group: 'root',
+          mode: '0755' }

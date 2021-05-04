@@ -1,0 +1,53 @@
+---
+- name: Create journald to log service
+  copy:
+    src: etc/systemd/system/journal-logger.service
+    dest: /etc/systemd/system/journal-logger.service
+
+- name: Configure logrotate on journald log
+  copy:
+    src: etc/logrotate.d/journal-logger
+    dest: /etc/logrotate.d/journal-logger
+
+- name: Enable logger
+  systemd:
+    name: journal-logger.service
+    state: started
+    enabled: True
+    daemon_reload: True
+
+- name: Install UF
+  zypper:
+    state: present
+    update_cache: True
+    name: splunkforwarder
+
+- name: Create deployment boostrap app
+  copy:
+    src: opt/splunkforwarder/etc/apps/zzz_xxx_bootstrap_deployment_server/
+    dest: /opt/splunkforwarder/etc/apps/zzz_xxx_bootstrap_deployment_server/
+
+- name: Enable forwarder on boot
+  copy:
+    src: etc/systemd/system/splunkforwarder.service
+    dest: /etc/systemd/system/splunkforwarder.service
+
+- name: Start forwarder
+  systemd:
+    name: splunkforwarder.service
+    state: started
+    daemon_reload: True
+    enabled: True
+
+- name: DMESG startup cron job
+  cron:
+    name: "Copy startup DMESG for splunk"
+    special_time: reboot
+    job: "bash -c 'dmesg > /var/log/splunk-dmesg.log'"
+
+- name: Disable/Stop RSyslog
+  systemd:
+    name: rsyslog
+    state: stopped
+    enabled: False
+  failed_when: False

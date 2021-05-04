@@ -1,0 +1,21 @@
+---
+- name: Common Base
+  import_tasks: common.yml
+
+- name: Create Common Directories
+  import_tasks: common_dirs.yml
+
+- name: Create Startup and Shutdown
+  import_tasks: server_stop_start.yml
+
+- name: Install CMK Agent
+  import_tasks: cmk_agent.yml
+
+- name: Configure Splunk UF
+  import_tasks: splunk_uf.yml
+
+- name: Install Nessus Agent
+  import_tasks: nessus_agent.yml
+
+- name: Disable IPv6
+  import_tasks: sysctl.yml

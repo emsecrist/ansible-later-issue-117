@@ -1,0 +1,42 @@
+
+
+# Distribute xxx_maint script template
+- name: xxx_maint template
+  template:
+    src: xxx_maint.j2
+    dest: /etc/init.d/xxx_maint
+    owner: root
+    group: root
+    mode: 0744
+
+# Distribute start script template
+- name: start template
+  template:
+    src: sys_start.j2
+    dest: /etc/init.d/xxx_maint.d/start
+    owner: root
+    group: root
+    mode: 0744
+
+# Distribute stop script template
+- name: stop template
+  template:
+    src: sys_stop.j2
+    dest: /etc/init.d/xxx_maint.d/stop
+    owner: root
+    group: root
+    mode: 0744
+
+# Distribute 0_reboot script template
+- name: 0_reboot template
+  template:
+    src: 0_reboot.j2
+    dest: /etc/init.d/xxx_maint.d/start.d/0_reboot
+    owner: root
+    group: root
+    mode: 0744
+
+# Activate the init script
+- name: activate new reboot init script
+  command: insserv /etc/init.d/xxx_maint
+
